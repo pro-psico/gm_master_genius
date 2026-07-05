@@ -8,18 +8,48 @@ type OpeningBoardProps = {
 
 export function OpeningBoard({ positions }: OpeningBoardProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [boardWidth, setBoardWidth] = useState(320);
 
+  const hasPositions = positions.length > 0;
+  const lastIndex = Math.max(positions.length - 1, 0);
   const currentPosition = positions[currentIndex];
 
+  useEffect(() => {
+    setCurrentIndex(0);
+  }, [positions]);
+
+  useEffect(() => {
+    setCurrentIndex((previous) => Math.min(previous, lastIndex));
+  }, [lastIndex]);
+
   const currentMoveLabel = useMemo(() => {
-    if (!currentPosition || currentPosition.moveNumber === 0) {
+    if (!currentPosition || currentIndex === 0 || currentPosition.moveNumber === 0) {
       return "Posición inicial";
     }
 
     return `Movimiento ${currentPosition.moveNumber}: ${currentPosition.san}`;
-  }, [currentPosition]);
+  }, [currentPosition, currentIndex]);
+
+  const playedLine = useMemo(() => {
+    if (!hasPositions || currentIndex === 0) {
+      return "Todavía no se ha realizado ningún movimiento.";
+    }
+
+    return positions
+      .slice(1, currentIndex + 1)
+      .map((position, index) => {
+        const moveNumber = Math.floor(index / 2) + 1;
+
+        if (index % 2 === 0) {
+          return `${moveNumber}. ${position.san}`;
+        }
+
+        return position.san;
+      })
+      .join(" ");
+  }, [positions, currentIndex, hasPositions]);
 
   useEffect(() => {
     const updateBoardWidth = () => {
@@ -43,7 +73,7 @@ export function OpeningBoard({ positions }: OpeningBoardProps) {
   };
 
   const goNext = () => {
-    setCurrentIndex((previous) => Math.min(previous + 1, positions.length - 1));
+    setCurrentIndex((previous) => Math.min(previous + 1, lastIndex));
   };
 
   const reset = () => {
@@ -74,10 +104,16 @@ export function OpeningBoard({ positions }: OpeningBoardProps) {
       </div>
 
       <div className="mt-5 rounded-2xl bg-slate-950/70 p-4">
-        <p className="text-sm font-bold text-amber-200">{currentMoveLabel}</p>
+        <p className="text-sm font-bold text-amber-200">
+          {currentMoveLabel}
+        </p>
 
-        <p className="mt-2 break-all font-mono text-xs text-slate-400">
-          {currentPosition.fen}
+        <p className="mt-2 text-sm text-slate-300">
+          {playedLine}
+        </p>
+
+        <p className="mt-2 text-xs text-slate-500">
+          Posición {currentIndex + 1} de {positions.length}
         </p>
 
         <div className="mt-4 grid grid-cols-3 gap-2">
@@ -93,7 +129,8 @@ export function OpeningBoard({ positions }: OpeningBoardProps) {
           <button
             type="button"
             onClick={reset}
-            className="rounded-2xl border border-white/10 px-3 py-3 text-sm font-bold text-white transition hover:bg-white/10"
+            disabled={currentIndex === 0}
+            className="rounded-2xl border border-white/10 px-3 py-3 text-sm font-bold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
           >
             Inicio
           </button>
@@ -101,7 +138,7 @@ export function OpeningBoard({ positions }: OpeningBoardProps) {
           <button
             type="button"
             onClick={goNext}
-            disabled={currentIndex === positions.length - 1}
+            disabled={currentIndex === lastIndex}
             className="rounded-2xl bg-amber-300 px-3 py-3 text-sm font-black text-slate-950 transition hover:bg-amber-200 disabled:cursor-not-allowed disabled:opacity-40"
           >
             Siguiente

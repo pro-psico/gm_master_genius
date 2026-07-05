@@ -30,7 +30,21 @@ export function OpeningCard({ opening }: OpeningCardProps) {
       </p>
 
       <div className="mt-4 rounded-2xl bg-slate-950/70 p-3 font-mono text-xs text-slate-300">
-        {opening.moves.join(" ")}
+        {opening.movesText || "Posición inicial"}
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        {opening.isEcoRoot && (
+          <span className="rounded-full border border-amber-300/30 bg-amber-300/10 px-3 py-1 text-xs font-bold text-amber-200">
+            Línea raíz ECO
+          </span>
+        )}
+
+        {opening.source && (
+          <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-slate-400">
+            {opening.source}
+          </span>
+        )}
       </div>
     </Link>
   );

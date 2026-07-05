@@ -2,7 +2,9 @@ export type ChessColor = "white" | "black";
 
 export type OpeningVariant = {
   id: string;
+  eco: string;
   name: string;
+  fen: string;
   moves: string[];
   description: string;
 };
@@ -12,11 +14,15 @@ export type Opening = {
   eco: string;
   name: string;
   family: string;
+  fen: string;
   moves: string[];
+  movesText: string;
   sideToMove: ChessColor;
   description: string;
   ideas: string[];
   variants: OpeningVariant[];
+  source?: string;
+  isEcoRoot?: boolean;
 };
 
 export type OpeningLinePosition = {
@@ -33,6 +39,8 @@ export type OpeningLineResponse = {
 
 export type ApiListResponse<T> = {
   total: number;
+  page: number;
+  limit: number;
   data: T[];
 };
 

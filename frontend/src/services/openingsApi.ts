@@ -11,16 +11,30 @@ const API_BASE_URL =
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 8000,
+  timeout: 15000,
   headers: {
     "Content-Type": "application/json"
   }
 });
 
-export const getOpenings = async (search?: string): Promise<ApiListResponse<Opening>> => {
+type GetOpeningsParams = {
+  search?: string;
+  eco?: string;
+  category?: string;
+  page?: number;
+  limit?: number;
+};
+
+export const getOpenings = async (
+  params: GetOpeningsParams = {}
+): Promise<ApiListResponse<Opening>> => {
   const response = await apiClient.get<ApiListResponse<Opening>>("/openings", {
     params: {
-      search: search?.trim() || undefined
+      search: params.search?.trim() || undefined,
+      eco: params.eco?.trim() || undefined,
+      category: params.category?.trim() || undefined,
+      page: params.page ?? 1,
+      limit: params.limit ?? 30
     }
   });
 
@@ -42,6 +56,21 @@ export const getOpeningLine = async (
 ): Promise<ApiSingleResponse<OpeningLineResponse>> => {
   const response = await apiClient.get<ApiSingleResponse<OpeningLineResponse>>(
     `/openings/${encodeURIComponent(id)}/line`
+  );
+
+  return response.data;
+};
+
+export const lookupOpeningByFen = async (
+  fen: string
+): Promise<ApiSingleResponse<Opening>> => {
+  const response = await apiClient.get<ApiSingleResponse<Opening>>(
+    "/openings/lookup/by-fen",
+    {
+      params: {
+        fen
+      }
+    }
   );
 
   return response.data;
